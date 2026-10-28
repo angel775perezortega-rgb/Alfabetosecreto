@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#5c6ac4" />
+    <title>Traductor de letras y números</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section id="emailPrompt" class="email-prompt" role="dialog" aria-modal="true" aria-labelledby="emailPromptTitle" hidden>
+      <form id="emailForm" class="email-prompt-card">
+        <h2 id="emailPromptTitle">Crea tu cuenta</h2>
+        <p id="accountPromptDescription">Elige un usuario y una contraseña. La cuenta se guarda solo en este navegador; no se enviará ningún correo.</p>
+        <label for="accountUsername">Usuario</label>
+        <input id="accountUsername" type="text" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" required />
+        <label for="accountPassword">Contraseña</label>
+        <input id="accountPassword" type="password" autocomplete="new-password" minlength="8" required />
+        <label for="emailAddress">Correo electrónico (opcional)</label>
+        <input id="emailAddress" type="email" autocomplete="email" />
+        <button id="accountSubmit" type="submit">Crear cuenta</button>
+      </form>
+    </section>
+    <button id="accountMenuToggle" class="account-menu-toggle" type="button" aria-label="Abrir menú de cuenta" aria-expanded="false" aria-controls="accountSidebar">☰</button>
+    <button id="sidebarBackdrop" class="sidebar-backdrop" type="button" aria-label="Cerrar menú" hidden></button>
+    <aside id="accountSidebar" class="account-sidebar" role="dialog" aria-modal="true" aria-labelledby="accountSidebarTitle" aria-hidden="true" hidden>
+      <div class="sidebar-heading">
+        <h2 id="accountSidebarTitle" data-i18n="accountTitle">Tu cuenta</h2>
+        <button id="accountMenuClose" class="secondary sidebar-close" type="button" aria-label="Cerrar menú">×</button>
+      </div>
+      <h3>Usuario</h3>
+      <p id="accountUsernameDisplay" class="account-email">—</p>
+      <h3 id="accountEmailHeading" hidden>Correo electrónico</h3>
+      <p id="accountEmail" class="account-email" hidden>—</p>
+      <p class="account-storage-note" data-i18n="accountStorageNote">Guardado solo en este navegador.</p>
+      <button id="accountLogout" class="secondary" type="button">Cerrar sesión</button>
+      <p class="account-archive-note" data-i18n="accountArchiveNote">¿Tienes archivos ZIP con HTML, CSS y JavaScript de versiones antiguas o anticipadas? Aquí podrás importarlos.</p>
+      <label class="account-archive-upload-label" for="accountArchiveUpload" data-i18n="accountArchiveUploadLabel">Selecciona un archivo ZIP</label>
+      <input id="accountArchiveUpload" class="account-archive-upload" type="file" accept=".zip,application/zip" />
+      <button id="runArchive" class="account-archive-run" type="button" data-i18n="archiveRun" disabled>Ejecutar ZIP</button>
+      <p class="account-archive-test"><a href="https://alfabetosecretoTest.netlify.app/" target="_blank" rel="noopener noreferrer">Test versiones</a>: para probar versiones no terminadas. «Ejecutar ZIP» es para versiones anticipadas terminadas.</p>
+      <p id="archiveStatus" class="archive-status" role="status" aria-live="polite"></p>
+    </aside>
+    <section id="archiveVersionPrompt" class="archive-version-prompt" role="dialog" aria-modal="true" aria-labelledby="archiveVersionPromptTitle" hidden>
+      <div class="archive-version-prompt-card">
+        <h2 id="archiveVersionPromptTitle" data-i18n="archiveVersionPromptTitle">Antes de ejecutar el ZIP</h2>
+        <p id="archiveSignature" class="archive-signature" aria-live="polite"></p>
+        <p class="archive-signature-note" data-i18n="archiveSignatureNote">El ZIP debe contener Firma.js con la firma exacta de la versión 7.</p>
+        <div class="archive-version-prompt-actions">
+          <button id="cancelArchiveRun" class="secondary" type="button" data-i18n="archiveCancel">Cancelar</button>
+          <button id="confirmArchiveRun" type="button" data-i18n="archiveContinue">Continuar</button>
+        </div>
+      </div>
+    </section>
+    <section id="archivePreview" class="archive-preview" role="dialog" aria-modal="true" aria-labelledby="archivePreviewTitle" hidden>
+      <div class="archive-preview-card">
+        <div class="archive-preview-heading">
+          <h2 id="archivePreviewTitle" class="visually-hidden" data-i18n="archivePreviewTitle">Vista previa del ZIP</h2>
+          <button id="closeArchivePreview" class="secondary archive-preview-close" type="button" aria-label="Salir de la versión anticipada" title="Salir">×</button>
+        </div>
+        <iframe id="archiveFrame" title="Versión anticipada ejecutándose a pantalla completa" sandbox="allow-scripts"></iframe>
+      </div>
+    </section>
+    <main class="page">
+      <header class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow" data-i18n="eyebrow">TU ESPACIO MULTILINGÜE</span>
+          <h1 class="title" data-i18n="title">Traductor de letras y números</h1>
+          <p class="description" data-i18n="description">Traduce texto a códigos numéricos y descífralos en tu idioma.</p>
+        </div>
+        <section class="locale-panel" aria-label="Preferencias regionales">
+          <label for="languageSelect" data-i18n="languageLabel">Idioma</label>
+          <select id="languageSelect">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="pt">Português</option>
+          </select>
+          <label for="styleSelect" data-i18n="styleLabel">Estilo</label>
+          <select id="styleSelect">
+            <option value="standard" data-i18n="styleStandard">Estándar</option>
+            <option value="festive" data-i18n="styleFestive">Festivo</option>
+            <option value="halloween" data-i18n="styleHalloween" hidden>Halloween</option>
+            <option value="custom" data-i18n="styleCustom">Personalizado</option>
+          </select>
+          <div id="customStyleControls" class="custom-style-controls" hidden>
+            <label for="customBackground" data-i18n="customBackgroundLabel">Color del fondo</label>
+            <input id="customBackground" type="color" value="#eaf3ff" />
+            <label for="customOutline" data-i18n="customOutlineLabel">Color de contornos</label>
+            <input id="customOutline" type="color" value="#b9d4f0" />
+          </div>
+          <label for="countrySelect" data-i18n="countryLabel">País o región</label>
+          <select id="countrySelect">
+            <option value="ES" data-country="ES">España</option>
+            <option value="MX" data-country="MX">México</option>
+            <option value="AR" data-country="AR">Argentina</option>
+            <option value="CO" data-country="CO">Colombia</option>
+            <option value="US" data-country="US">Estados Unidos</option>
+            <option value="GB" data-country="GB">Reino Unido</option>
+            <option value="FR" data-country="FR">Francia</option>
+            <option value="BR" data-country="BR">Brasil</option>
+            <option value="PT" data-country="PT">Portugal</option>
+          </select>
+          <p class="locale-note" data-i18n="localeNote">La selección adapta el idioma y los formatos regionales de la interfaz.</p>
+        </section>
+      </header>
+
+      <aside id="seasonalEvent" class="seasonal-event" aria-live="polite" hidden>
+        <span id="seasonalIcon" class="seasonal-icon" aria-hidden="true">🎉</span>
+        <div>
+          <h2></h2>
+          <p></p>
+        </div>
+      </aside>
+
+      <section id="tutorial" class="tutorial" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" hidden>
+        <div class="tutorial-card">
+          <p id="tutorialStep" class="tutorial-step"></p>
+          <h2 id="tutorialTitle"></h2>
+          <p id="tutorialDescription"></p>
+          <div class="tutorial-actions">
+            <button id="tutorialSkip" type="button" class="secondary"></button>
+            <button id="tutorialBack" type="button" class="secondary"></button>
+            <button id="tutorialNext" type="button"></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="translatorTitle">
+        <div class="section-heading">
+          <span class="section-icon" aria-hidden="true">↔</span>
+          <div>
+            <h2 id="translatorTitle" data-i18n="translatorTitle">Traductor de letras y números</h2>
+            <p data-i18n="translatorDescription">Admite mayúsculas, minúsculas, números y símbolos estándar.</p>
+            <button id="openTutorial" type="button" class="secondary tutorial-link" data-i18n="tutorialOpen">Ver tutorial</button>
+          </div>
+        </div>
+
+        <section class="code-panel" aria-label="Código de alfabeto">
+          <label for="alphabetCode" data-i18n="codeLabel">Código para cambiar el alfabeto</label>
+          <div class="code-actions">
+            <input id="alphabetCode" type="file" accept=".cnv,application/octet-stream" aria-label="Selecciona un archivo CNV" />
+            <button id="applyCode" type="button" data-i18n="applyCode">Cargar archivo</button>
+            <button id="resetCode" type="button" class="secondary" data-i18n="resetCode">Alfabeto original</button>
+          </div>
+          <p id="codeStatus" class="hint" data-i18n="codeHint">Introduce el código secreto para cambiar el orden del alfabeto.</p>
+          <div id="codeMetadata" class="code-metadata" hidden aria-live="polite">
+            <dl class="metadata-primary">
+              <div><dt data-i18n="metadataAlphabet">Alfabeto</dt><dd id="metadataAlphabet">—</dd></div>
+            </dl>
+            <details class="metadata-details">
+              <summary data-i18n="metadataViewAll">Ver toda la información</summary>
+              <dl class="metadata-fields">
+                <div><dt data-i18n="metadataFile">Archivo</dt><dd id="metadataFile">—</dd></div>
+                <div><dt data-i18n="metadataSize">Tamaño</dt><dd id="metadataSize">—</dd></div>
+                <div><dt data-i18n="metadataAuthor">Autoría</dt><dd id="metadataAuthor">—</dd></div>
+                <div><dt data-i18n="metadataDescription">Descripción</dt><dd id="metadataDescription">—</dd></div>
+                <div><dt data-i18n="metadataId">Identificador</dt><dd id="metadataId">—</dd></div>
+                <div><dt data-i18n="metadataVersion">Versión</dt><dd id="metadataVersion">—</dd></div>
+                <div><dt data-i18n="metadataLicense">Licencia</dt><dd id="metadataLicense">—</dd></div>
+                <div class="metadata-fingerprint"><dt data-i18n="metadataFingerprint">Huella SHA-256</dt><dd id="metadataFingerprint">—</dd></div>
+                <div class="metadata-notice"><dt data-i18n="metadataNoticeLabel">Nota</dt><dd data-i18n="metadataNotice">La huella ayuda a verificar si el archivo cambió; los metadatos no evitan que se copie o se suplante su autoría.</dd></div>
+              </dl>
+            </details>
+          </div>
+        </section>
+
+        <label for="inputText" data-i18n="inputLabel">Texto o códigos numéricos</label>
+        <textarea id="inputText" rows="4" placeholder="Ejemplo: HOLA o 8 16 12 1" data-i18n-placeholder="inputPlaceholder"></textarea>
+        <p class="hint" data-i18n="translatorHint">Un espacio entre códigos y dos espacios entre palabras. Cada código tiene hasta 2 dígitos.</p>
+
+        <div class="actions">
+          <button id="toNumbers" type="button" data-i18n="toNumbers">Texto → números</button>
+          <button id="toSpanish" type="button" class="secondary" data-i18n="toText">Números → texto</button>
+          <button id="copyOutput" type="button" class="secondary" disabled data-i18n="copyResult">Copiar resultado</button>
+        </div>
+
+        <label for="outputText" data-i18n="resultLabel">Resultado</label>
+        <textarea id="outputText" rows="4" readonly placeholder="Aquí aparecerá la traducción" data-i18n-placeholder="resultPlaceholder"></textarea>
+        <p id="message" class="message" aria-live="polite"></p>
+      </section>
+
+      <section class="card twitch-card" aria-labelledby="twitchTitle">
+        <div class="section-heading">
+          <span class="section-icon" aria-hidden="true">◉</span>
+          <div>
+            <h2 id="twitchTitle">Traductor automático de Twitch</h2>
+            <p>Conéctate a un canal público para descifrar automáticamente sus mensajes numéricos.</p>
+          </div>
+        </div>
+        <label for="twitchChannel">Canal de Twitch</label>
+        <div class="twitch-controls">
+          <div class="twitch-channel-input">
+            <span aria-hidden="true">twitch.tv/</span>
+            <input id="twitchChannel" type="text" autocomplete="off" spellcheck="false" placeholder="nombre_del_canal" aria-label="Nombre del canal de Twitch" />
+          </div>
+          <button id="twitchConnect" type="button">Conectar</button>
+          <button id="twitchDisconnect" type="button" class="secondary" disabled>Desconectar</button>
+        </div>
+        <p id="twitchStatus" class="hint" role="status" aria-live="polite">Desconectado. Se descifran los mensajes que contienen códigos numéricos válidos.</p>
+        <label class="twitch-voice-option"><input id="twitchVoice" type="checkbox" /> Leer las traducciones en voz alta</label>
+        <div class="twitch-result" aria-live="polite">
+          <p><strong>Último mensaje:</strong> <span id="twitchOriginal">—</span></p>
+          <p><strong>Traducción:</strong> <span id="twitchTranslation">—</span></p>
+        </div>
+      </section>
+
+      <footer class="footer" data-i18n="footer">Hecho para que te sientas en casa, estés donde estés.</footer>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
